@@ -1,0 +1,286 @@
+---
+title: "Final Project"
+author: "Dominic Skinnion"
+date: "11/14/2019"
+output: html_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(gganimate)
+library(purrr)
+library(janitor)
+library(plotrix)
+library(scales)
+library(ggthemes)
+library(robustfa)
+library(broom)
+library(tidyverse)
+```
+# About
+
+In the United States, the people do not directly vote for President. The Founding Fathers believed that a true democracy was subject to the rule of factions and mob rule. The electoral college, they believed, would protect against this. Instead of having each person's vote count towards President, each state receives a certain number of electoral votes. The number of electoral votes for each state is equal to the numbers of members of congress for that state (the number of senators, plus the number of representatives). When the 23rd Amendment was ratified in 1961, Washington D.C. was also given electoral votes, but not to exceed the lowest number of votes that a state has -- this has usually limited D.C. to 3 votes.
+
+The data for the United States general elections was found from a Github repository which included multiple government datasets. Elections that were contested were labelled with asterisks in this dataset, so I ammended the dataset with the wikipedia data set found here: https://en.wikipedia.org/wiki/United_States_Electoral_College. The population data for the states are based off of the United States Census, conducted every 10 years. This dataset was found from a GitHub repository with historical data.
+
+```{r data, include = FALSE}
+
+elections <- read.csv("raw-data/elec.csv") %>%
+   separate("Year", c("year", "president"), sep = "-", remove = TRUE,
+  convert = TRUE) %>%
+  clean_names()
+
+
+census <- read.csv("raw-data/nhgis0011_ts_state.csv") %>%
+  clean_names()
+```
+
+```{r fixing variable types, echo = FALSE, warning = FALSE}
+elections <- elections %>%
+  mutate(year = year, president = president, state = state, total = total, party_1 = as.numeric(as.character(party_1)), percent_1 = as.numeric(as.character(x)), electoral_votes_1 = as.numeric(as.character(ev)), party_2 = as.numeric(as.character(party_2)), percent_2 = as.numeric(as.character(x_1)), electoral_votes_2 = as.numeric(as.character(ev_1)), party_3 = as.numeric(as.character(party_3)), percent_3 = as.numeric(as.character(x_2)), electoral_votes_3 = as.numeric(as.character(ev_2)), party_4 = as.numeric(as.character(party_4)), percent_4 = as.numeric(as.character(x_3)), electoral_votes_4 = as.numeric(as.character(ev_3)), party = party, notes = notes) %>%
+  select(year, president, state, total, party_1, percent_1, electoral_votes_1, party_2, percent_2, electoral_votes_2, party_3, percent_3, electoral_votes_3, party_4, percent_4, electoral_votes_4, party, notes)
+
+elections[is.na(elections)] <- 0
+```
+
+```{r adding total EV, echo = FALSE}
+elections_with_total_ev <- elections %>%
+  mutate(state_electoral_votes = electoral_votes_1 + electoral_votes_2 + electoral_votes_3 + electoral_votes_4) %>%
+  mutate(state_electoral_votes = ifelse(state_electoral_votes == 0, party_1 + party_2 + party_3 + party_4, state_electoral_votes))
+```
+
+```{r census selections, echo = FALSE}
+state_populations <- census %>%
+  mutate(population = a00aa) %>%
+  select(year, state, population) %>%
+  filter(str_detect(state, "Territory", negate = TRUE), state != "Persons in the Military", state != "Puerto Rico") %>%
+  arrange(state) 
+```
+
+```{r fixing total votes, echo = FALSE}
+electoral_votes <- elections_with_total_ev %>%
+  select(year, president, state, party, state_electoral_votes)
+
+# Need to fix numbers: contested elections. I am looking at the number of electoral votes allotted, so these numbers should still be counted. Corrected numbers from https://en.wikipedia.org/wiki/United_States_Electoral_College
+electoral_votes[488, 5] = 6
+electoral_votes[493, 5] = 11
+electoral_votes[498, 5] = 12
+electoral_votes[499, 5] = 8
+electoral_votes[501, 5] = 8
+electoral_votes[506, 5] = 15
+electoral_votes[518, 5] = 12
+electoral_votes[519, 5] = 8
+electoral_votes[1429, 5] = 11
+electoral_votes[1477, 5] = 11
+electoral_votes[1500, 5] = 8
+electoral_votes[1512, 5] = 8
+electoral_votes[1675, 5] = 12
+electoral_votes[1727, 5] = 9
+electoral_votes[1881, 5] = 6
+electoral_votes[1994, 5] = 3
+electoral_votes[2060, 5] = 10
+electoral_votes[2115, 5] = 5
+electoral_votes[2201, 5] = 4
+electoral_votes[2217, 5] = 5
+electoral_votes[2233, 5] = 38
+electoral_votes[2237, 5] = 12
+```
+
+# 10 States with the Most Electoral Votes in 2016
+
+```{r ev 2016 plot, echo = FALSE}
+electoral_votes %>%
+  filter(year == 2016) %>%
+  arrange(desc(state_electoral_votes)) %>%
+  slice(1:10) %>%
+  ggplot(aes(x = reorder(state, -state_electoral_votes), y = state_electoral_votes, fill = party)) +
+    geom_col() +
+    coord_flip() +
+    scale_fill_manual(values = c("#0015BC", "#BC1500"), name = "Party") +
+    labs(title = "States with the Most Electoral Votes in 2016", x = "Number of Electoral Votes", y = "State")
+```
+
+```{r function}
+state_function <- function(input){
+  state_pop_estimated <- state_populations %>%
+    filter(state == input) %>%
+    select(year, population, state) %>%
+    approx(xout = round(min(state_populations$year), digits = 3):2016, method = "linear", rule = 2) %>% #round(min(state_populations$year), digits = 3)
+    as.data.frame() %>%
+    mutate(year = x, population = round(y, 0)) %>%
+    select(year, population)
+  
+  state_electoral_votes <- electoral_votes %>%
+    filter(state == input)
+  
+  inner_join(state_pop_estimated, state_electoral_votes, by = "year")
+}
+```
+
+```{r vector}
+n <- unique(elections$state)[-51]
+n <- as.character(n)
+typeof(n)
+```
+
+```{r map}
+state_dfs <- map(n, state_function)
+
+complete_df <- bind_rows(state_dfs)
+```
+
+
+```{r DC census, echo = FALSE}
+raw_DC_census <- state_populations %>%
+  filter(state == "District Of Columbia")
+
+estimated_DC <- raw_DC_census %>%
+  select(year, population, state) %>%
+  approx(xout = 1864:2016, method = "linear", rule = 2)
+
+estimated_DC <- as.data.frame(estimated_DC)
+estimated_DC <- estimated_DC %>%
+  mutate(year = x, population = round(y, 0)) %>%
+  select(year, population)
+
+electoral_votes_DC <- electoral_votes %>%
+  filter(state == "Dist. of Col.")
+
+joined_DC <- inner_join(estimated_DC, electoral_votes_DC, by = "year")
+```
+
+```{r joining to make one dataframe, include = FALSE}
+complete_data_frame <- bind_rows(complete_df, joined_DC) %>%
+  select(year, state, president, party, population, state_electoral_votes) %>%
+  mutate(ev_density = state_electoral_votes / population) %>%
+  mutate(Rep = ifelse(party == "Republican", 1, 0))
+```
+
+```{r grouped by year, include = FALSE}
+data_frame_by_year <- complete_data_frame %>%
+  arrange(year)
+```
+
+```{r graphic 2016, echo = FALSE}
+data_frame_by_year %>%
+  filter(year == 2016) %>%
+  ggplot(aes(x = reorder(state, ev_density), y = ev_density, fill = party)) +
+    geom_col() +
+    coord_flip() +
+    scale_fill_manual(values = c("#0000FF", "#FF0000"))
+
+data_frame_by_year %>%
+  filter(year == 2016) %>%
+  ggplot(aes(x = 1/population, y = ev_density)) +
+    geom_point()
+
+```
+
+```{r recent years graphic function, include = FALSE}
+make_graphic <- function(input){
+  title <- paste("Electoral Vote Densities in", input)
+  
+  data_frame_by_year %>%
+    filter(year == input) %>%
+    ggplot(aes(x = reorder(state, ev_density), y = ev_density, fill = party)) +
+      geom_col() +
+      coord_flip() +
+      scale_fill_manual(values = c("#0000FF", "#FF0000", "#00FF00", "#00FF00", "#00FF00", "#00FF00")) +
+      labs(title = title)
+}
+
+years_vector = c(2000, 2004, 2008, 2012, 2016)
+
+plots <- map(years_vector, make_graphic)
+```
+
+```{r recent years graphics, echo = FALSE, warning = FALSE, message = FALSE}
+plots
+```
+
+```{r regression model}
+recent_years <- complete_data_frame %>%
+  filter(year >= 1932)
+
+rep_model <- lm(data = recent_years, formula = ev_density ~ Rep * year)
+```
+
+```{r regression plot data}
+year_df <- data.frame(Rep = rep(1, 85), year = 1932:2016)
+year_df$predicted_value <- as.numeric(predict.lm(rep_model, year_df))
+
+year_df_dem <- data.frame(Rep = rep(0, 85), year = 1932:2016)
+year_df$predicted_value_dem <- as.numeric(predict.lm(rep_model, year_df_dem))
+```
+
+```{r regression plot}
+ggplot(year_df) +
+  geom_point(aes(x = year, y = predicted_value),  color = "red") +
+  geom_point(aes(x = year, y = predicted_value_dem), color = "blue")
+```
+
+```{r total ev density and pop by year, echo = FALSE}
+totals_by_year <- complete_data_frame %>%
+  group_by(year) %>%
+  summarize(total_ev_density = sum(ev_density),
+            total_population = sum(population),
+            total_ev = sum(state_electoral_votes))
+
+complete_with_totals <- inner_join(complete_data_frame, totals_by_year, by = "year")
+complete_with_totals <- complete_with_totals %>%
+  mutate(ev_prop = state_electoral_votes / total_ev,
+         pop_prop = population / total_population)
+```
+
+```{r stacked bar chart, electoral votes}
+complete_with_totals %>%
+  filter(year >= 1964) %>%
+  ggplot(aes(x = year, y = state_electoral_votes, fill = party)) +
+    geom_col() +
+    geom_hline(yintercept = 270) +
+    coord_flip() +
+    scale_fill_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
+    labs(title = "Electoral Votes in Recent Years", x = "Year", y = "Electoral Votes") +
+    theme_fivethirtyeight()
+```
+
+```{r stacked bar chart by proportion}
+complete_with_totals %>%
+  filter(year >= 1900) %>%
+  ggplot(aes(x = year, y = ev_prop, fill = party)) +
+    geom_col() +
+    geom_hline(yintercept = .5) +
+    coord_flip() +
+    scale_fill_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
+    labs(title = "Electoral Votes in Recent Years", x = "Year", y = "Electoral Votes") +
+    theme_fivethirtyeight()
+```
+
+```{r stacked bar chart by pop prop}
+
+# Shows what would have happened if a state has electoral votes allocated
+# directly proportional to population, and winner take-all system
+
+complete_with_totals %>%
+  filter(year >= 1964) %>%
+  ggplot(aes(x = year, y = pop_prop, fill = party)) +
+    geom_col() +
+    geom_hline(yintercept = 0.5) +
+    coord_flip() +
+    scale_fill_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
+    labs(title = "Electoral Votes in Recent Years", x = "Year", y = "Electoral Votes") +
+    theme_fivethirtyeight()
+```
+
+```{r animated graphic, echo = FALSE, eval = FALSE}
+# Need to make bars switch positions
+complete_data_frame %>%
+  filter(year %in% c(2004:2016)) %>%
+  ggplot(aes(x = reorder(state, ev_density), y = ev_density, fill = party)) +
+    geom_col() +
+    coord_flip() +
+    scale_fill_manual(values = c("#0000FF", "#FF0000")) +
+    labs(title = "Electoral Vote Density in {round(frame_time, 0)}", 
+         x = "State", y = "Electoral Vote Density*") +
+    transition_time(year) +
+    ease_aes('cubic-in-out')
+```
