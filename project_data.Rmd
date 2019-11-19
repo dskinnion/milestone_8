@@ -89,18 +89,31 @@ electoral_votes[2237, 5] = 12
 ```{r modern popular vote dataframe, echo = FALSE}
 modern_popular_df <- elections_with_total_ev %>%
   filter(year >= 1932) %>%
-  mutate(dem_votes = party_1,
+  mutate(winning_pop_party = ifelse(year %in% c(1932, 1936, 1940, 1944, 1948, 1960, 1964, 1976, 1992, 1996, 2008, 2012, 2016),
+                                "Democratic", "Republican")) %>%
+  mutate(dem_votes = ifelse(winning_pop_party == "Democratic", party_1, party_2),
          dem_prop = dem_votes / total,
-         dem_ev = electoral_votes_1,
-         rep_votes = party_2,
+         dem_ev = ifelse(winning_pop_party == "Democratic", electoral_votes_1, electoral_votes_2),
+         rep_votes = ifelse(winning_pop_party == "Republican", party_1, party_2),
          rep_prop = rep_votes / total,
-         rep_ev = electoral_votes_2,
+         rep_ev = ifelse(winning_pop_party == "Republican", electoral_votes_1, electoral_votes_2),
          other_votes = party_3 + party_4,
          other_prop = other_votes / total,
          other_ev = electoral_votes_3 + electoral_votes_4,
          winner = party) %>%
   select(year, president, state, total, dem_votes, dem_prop, dem_ev, rep_votes,
          rep_prop, rep_ev, other_votes, other_prop, other_ev, winner, state_electoral_votes)
+
+elections_with_total_ev_by_year <- elections_with_total_ev %>%
+  group_by(year) %>%
+  summarize(total_party_1 = sum(party_1),
+            total_electoral_votes_1 = sum(electoral_votes_1),
+            total_party_2 = sum(party_2),
+            total_electoral_votes_2 = sum(electoral_votes_2), 
+            total_party_3 = sum(party_3),
+            total_electoral_votes_3 = sum(electoral_votes_3),
+            total_party_4 = sum(party_4),
+            total_electoral_votes_4 = sum(electoral_votes_4))
 ```
 
 ```{r modern pop vote with totals, echo = FALSE}
@@ -110,7 +123,7 @@ modern_popular_totals <- modern_popular_df %>%
             total_rep_votes = sum(rep_votes),
             total_other_votes = sum(other_votes)) %>%
   mutate(total = total_dem_votes + total_rep_votes + total_other_votes,
-         Democrat = total_dem_votes / total,
+         Democratic = total_dem_votes / total,
          Republican = total_rep_votes / total,
          Other = total_other_votes / total)
 ```
@@ -120,17 +133,17 @@ rep_totals <- modern_popular_totals %>%
   melt.data.frame(id.vars = "year", measure.vars = "Republican", variable_name = "Party")
 
 dem_totals <- modern_popular_totals %>%
-  melt.data.frame(id.vars = "year", measure.vars = "Democrat", variable_name = "Party")
+  melt.data.frame(id.vars = "year", measure.vars = "Democratic", variable_name = "Party")
 
 other_totals <- modern_popular_totals %>%
   melt.data.frame(id.vars = "year", measure.vars = "Other", variable_name = "Party")
 
 modern_pop_totals_by_party <- bind_rows(rep_totals, other_totals, dem_totals) %>%
-  mutate(proportion = value) %>%
-  select(year, Party, proportion)
+  mutate(popular_proportion = value) %>%
+  select(year, Party, popular_proportion)
 
 popular_graphic <- modern_pop_totals_by_party %>%
-ggplot(aes(x = year, y = proportion, fill = Party)) +
+ggplot(aes(x = year, y = popular_proportion, fill = Party)) +
   geom_bar(stat = "identity") +
   coord_flip() +
   geom_hline(yintercept = 0.5) +
@@ -316,6 +329,72 @@ directly_proportional_graphic <- complete_with_totals %>%
     theme_fivethirtyeight()
 
 ggsave("graphics/directly_proportional2.png", directly_proportional_graphic)
+```
+```{r modern_joined_df, echo = FALSE}
+modern_electoral_and_population_props <- complete_with_totals %>%
+  filter(year >= 1932) %>%
+  group_by(year, party) %>%
+  summarize(electoral_proportion = sum(ev_prop),
+            population_proportion = sum(pop_prop)) %>%
+  mutate(Party = party) %>%
+  select(year, Party, electoral_proportion, population_proportion) %>%
+  mutate(year_party = paste(year, Party, sep = "-"))
+
+modern_pop_totals_by_party <- modern_pop_totals_by_party %>%
+  mutate(year_party = paste(year, Party, sep = "-"))
+
+modern_joined_df <- full_join(modern_electoral_and_population_props, modern_pop_totals_by_party, by = "year_party") %>%
+  separate(col = year_party, into = c("year", "Party"), sep = "-") %>%
+  ungroup() %>%
+  select(year, Party, electoral_proportion, population_proportion, popular_proportion) %>%
+  mutate(electoral_proportion = ifelse(is.na(electoral_proportion) == TRUE, 0, electoral_proportion),
+         population_proportion = ifelse(is.na(population_proportion) == TRUE, 0, population_proportion)) %>%
+  mutate(ec_boost = electoral_proportion - popular_proportion)
+```
+
+```{r electoral college boost, echo = FALSE}
+ggplot(modern_joined_df) +
+  geom_point(aes(x = year, y = ec_boost, group = Party, color = Party)) +
+  geom_line(aes(x = year, y = ec_boost, group = Party, color = Party)) +
+  scale_color_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
+  scale_x_discrete(breaks = c(1932, 1944, 1956, 1968, 1980, 1992, 2004, 2016)) +
+  theme_fivethirtyeight() +
+  labs(title = "Effect of the Electoral College", subtitle = "Electoral Proportion - Popular Proportion", x = "Year", y = "Change in Proportion")
+
+ggplot(modern_joined_df) +
+  geom_point(aes(x = year, y = electoral_proportion, group = Party, color = Party)) +
+  geom_line(aes(x = year, y = electoral_proportion, group = Party, color = Party)) +
+  scale_color_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
+  scale_x_discrete(breaks = c(1932, 1944, 1956, 1968, 1980, 1992, 2004, 2016)) +
+  theme_fivethirtyeight() +
+  labs(title = "Electoral College Proportions",  x = "Year", y = "Proportion")
+
+ggplot(modern_joined_df) +
+  geom_point(aes(x = year, y = popular_proportion, group = Party, color = Party)) +
+  geom_line(aes(x = year, y = popular_proportion, group = Party, color = Party)) +
+  scale_color_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
+  scale_x_discrete(breaks = c(1932, 1944, 1956, 1968, 1980, 1992, 2004, 2016)) +
+  theme_fivethirtyeight() +
+  labs(title = "Popular Vote Proportions",  x = "Year", y = "Proportion")
+```
+
+```{r dataframe with winners, echo = FALSE}
+# modern_popular_winner <- modern_joined_df %>%
+#   group_by(year) %>%
+#   summarize()
+#   mutate(popular_winner = ifelse(popular_proportion > 0.5, "yes", "no"))
+# 
+# dems <- modern_popular_winner %>%
+#   filter(Party == "Democratic")
+# 
+# reps <- modern_popular_winner %>%
+#   filter(Party == "Republican")
+
+modern_popular_winner <- modern_joined_df %>%
+  pivot_wider(id_cols = year, names_from = Party, values_from = c(electoral_proportion, population_proportion, popular_proportion, ec_boost)) %>%
+  mutate(popular_winner = ifelse(popular_proportion_Democratic > popular_proportion_Republican, "Democratic", "Republican"),
+         electoral_winner = ifelse(electoral_proportion_Democratic > electoral_proportion_Republican, "Democratic", "Republican")) %>%
+  mutate(same_winner = ifelse(popular_winner == electoral_winner, "Yes", "No"))
 ```
 
 ```{r animated graphic, echo = FALSE, eval = FALSE}
