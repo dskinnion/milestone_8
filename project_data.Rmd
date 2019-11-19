@@ -287,7 +287,8 @@ complete_with_totals %>%
 ```{r stacked bar chart by proportion}
 electoral_votes_graphic <- complete_with_totals %>%
   filter(year >= 1932) %>%
-  ggplot(aes(x = year, y = ev_prop, fill = party)) +
+  mutate(Party = party) %>%
+  ggplot(aes(x = year, y = ev_prop, fill = Party)) +
     geom_col() +
     geom_hline(yintercept = .5) +
     coord_flip() +
@@ -305,7 +306,8 @@ ggsave("graphics/electoral_vote2.png", electoral_votes_graphic)
 
 directly_proportional_graphic <- complete_with_totals %>%
   filter(year >= 1932) %>%
-  ggplot(aes(x = year, y = pop_prop, fill = party)) +
+  mutate(Party = party) %>%
+  ggplot(aes(x = year, y = pop_prop, fill = Party)) +
     geom_col() +
     geom_hline(yintercept = 0.5) +
     coord_flip() +
