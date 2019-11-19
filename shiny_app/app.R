@@ -1,12 +1,6 @@
 library(shiny)
 library(plotly)
 
-#directly_proportional_graphic2 <- read_rds("./graphics/directly_proportional_graphic.rds")
-#electoral_votes_graphic2 <- read_rds("./graphics/electoral_votes_graphic.rds")
-#popular_graphic2 <- read_rds("./graphics/popular_graphics.rds")
-
-modern_pop_totals_by_party2 <- read_rds("modern_pop_totals_by_party.rds")
-
 ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                  tabPanel("About",
                           p("In the United States, the people do not directly 
@@ -35,11 +29,49 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           data.")),
 
                  tabPanel("Graphics",
+                          imageOutput("electoral_vote"),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          imageOutput("directly_proportional"),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
                           imageOutput("popular_vote")))
 
 server <- function(input, output) {
     output$popular_vote <- renderImage({
         list(src = "popular_vote2.png",
+             contentType = 'image/png',
+             height = "150%",
+             width = "75%",
+             align = "center"
+        )}, deleteFile = FALSE)
+
+    output$electoral_vote <- renderImage({
+        list(src = "electoral_vote2.png",
+             contentType = 'image/png',
+             height = "150%",
+             width = "75%",
+             align = "center"
+        )}, deleteFile = FALSE)
+
+    output$directly_proportional <- renderImage({
+        list(src = "directly_proportional2.png",
              contentType = 'image/png',
              height = "150%",
              width = "75%",

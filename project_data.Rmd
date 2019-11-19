@@ -138,9 +138,6 @@ ggplot(aes(x = year, y = proportion, fill = Party)) +
   labs(title = "What If The Election Were Popular?", x = "Year", y = "Votes") +
     theme_fivethirtyeight()
 
-write_rds(modern_pop_totals_by_party, path = "graphics/modern_pop_totals_by_party.rds")
-write_rds(popular_graphic, path = "graphics/popular_graphic.rds")
-
 ggsave("graphics/popular_vote2.png", popular_graphic)
 ```
 
@@ -298,7 +295,7 @@ electoral_votes_graphic <- complete_with_totals %>%
     labs(title = "Electoral Votes", x = "Year", y = "Electoral Votes") +
     theme_fivethirtyeight()
 
-write_rds(electoral_votes_graphic, path = "graphics/electoral_votes_graphic.rds")
+ggsave("graphics/electoral_vote2.png", electoral_votes_graphic)
 ```
 
 ```{r stacked bar chart by pop prop}
@@ -316,7 +313,7 @@ directly_proportional_graphic <- complete_with_totals %>%
     labs(title = "What If Electoral Votes were Directly Proportional?", x = "Year", y = "Electoral Votes") +
     theme_fivethirtyeight()
 
-write_rds(directly_proportional_graphic, path = "graphics/directly_proportional_graphic.rds")
+ggsave("graphics/directly_proportional2.png", directly_proportional_graphic)
 ```
 
 ```{r animated graphic, echo = FALSE, eval = FALSE}
