@@ -45,7 +45,31 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
                           imageOutput("directly_proportional"),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
                           br(),
                           br(),
                           br(),
@@ -67,25 +91,25 @@ server <- function(input, output) {
     output$popular_vote <- renderImage({
         list(src = "popular_vote2.png",
              contentType = 'image/png',
-             height = "150%",
-             width = "75%",
-             align = "center"
+             height = "200%",
+             width = "60%",
+             style="display: block; margin-left: auto; margin-right: auto;"
         )}, deleteFile = FALSE)
 
     output$electoral_vote <- renderImage({
         list(src = "electoral_vote2.png",
              contentType = 'image/png',
-             height = "150%",
-             width = "75%",
-             align = "center"
+             height = "200%",
+             width = "60%",
+             style="display: block; margin-left: auto; margin-right: auto;"
         )}, deleteFile = FALSE)
 
     output$directly_proportional <- renderImage({
         list(src = "directly_proportional2.png",
              contentType = 'image/png',
-             height = "150%",
-             width = "75%",
-             align = "center"
+             height = "200%",
+             width = "60%",
+             style="display: block; margin-left: auto; margin-right: auto;"
         )}, deleteFile = FALSE)}
 
 shinyApp(ui, server)
