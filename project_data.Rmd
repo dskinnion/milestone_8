@@ -394,7 +394,36 @@ modern_popular_winner <- modern_joined_df %>%
   pivot_wider(id_cols = year, names_from = Party, values_from = c(electoral_proportion, population_proportion, popular_proportion, ec_boost)) %>%
   mutate(popular_winner = ifelse(popular_proportion_Democratic > popular_proportion_Republican, "Democratic", "Republican"),
          electoral_winner = ifelse(electoral_proportion_Democratic > electoral_proportion_Republican, "Democratic", "Republican")) %>%
-  mutate(same_winner = ifelse(popular_winner == electoral_winner, "Yes", "No"))
+  mutate(electoral_loser = ifelse(electoral_winner == "Democratic", "Republican", "Democratic")) %>%
+  mutate(popular_loser = ifelse(popular_winner == "Democratic", "Republican", "Democratic")) %>%
+  mutate(same_winner = ifelse(popular_winner == electoral_winner, "Yes", "No")) %>%
+  mutate(electoral_winner_ec_boost = ifelse(electoral_winner == "Democratic", ec_boost_Democratic, ec_boost_Republican)) %>%
+  mutate(electoral_loser_ec_boost = ifelse(electoral_winner == "Democratic", ec_boost_Republican, ec_boost_Democratic)) %>%
+  mutate(popular_winner_ec_boost = ifelse(popular_winner == "Democratic", ec_boost_Democratic, ec_boost_Republican)) %>%
+  mutate(popular_loser_ec_boost = ifelse(popular_winner == "Democratic", ec_boost_Republican, ec_boost_Democratic))
+```
+
+```{r electoral and popular winner boost over time, echo = FALSE}
+modern_popular_winner %>%
+  ggplot(aes(x = year, y = electoral_winner_ec_boost, group = electoral_winner, color = electoral_winner)) +
+    geom_point() +
+    geom_line()
+
+modern_popular_winner %>%
+  ggplot(aes(x = year, y = popular_winner_ec_boost, group = popular_winner, color = popular_winner)) +
+    geom_point() +
+    geom_line()
+```
+```{r electoral loser boost, echo = FALSE}
+modern_popular_winner %>%
+  ggplot(aes(x = year, y = electoral_loser_ec_boost, group = electoral_loser, color = electoral_loser)) +
+    geom_point() +
+    geom_line()
+
+modern_popular_winner %>%
+  ggplot(aes(x = year, y = popular_loser_ec_boost, group = popular_loser, color = popular_loser)) +
+    geom_point() +
+    geom_line()
 ```
 
 ```{r animated graphic, echo = FALSE, eval = FALSE}
