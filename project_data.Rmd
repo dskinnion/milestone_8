@@ -5,7 +5,7 @@ date: "11/14/2019"
 output: html_document
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
 library(gganimate)
 library(purrr)
 library(janitor)
@@ -139,20 +139,6 @@ ggplot(aes(x = year, y = proportion, fill = Party)) +
     theme_fivethirtyeight()
 ```
 
-# 10 States with the Most Electoral Votes in 2016
-
-```{r ev 2016 plot, echo = FALSE}
-electoral_votes %>%
-  filter(year == 2016) %>%
-  arrange(desc(state_electoral_votes)) %>%
-  slice(1:10) %>%
-  ggplot(aes(x = reorder(state, -state_electoral_votes), y = state_electoral_votes, fill = party)) +
-    geom_col() +
-    coord_flip() +
-    scale_fill_manual(values = c("#0015BC", "#BC1500"), name = "Party") +
-    labs(title = "States with the Most Electoral Votes in 2016", x = "Number of Electoral Votes", y = "State")
-```
-
 ```{r function}
 state_function <- function(input){
   state_pop_estimated <- state_populations %>%
@@ -173,7 +159,6 @@ state_function <- function(input){
 ```{r vector}
 n <- unique(elections$state)[-51]
 n <- as.character(n)
-typeof(n)
 ```
 
 ```{r map}
@@ -214,7 +199,7 @@ data_frame_by_year <- complete_data_frame %>%
   arrange(year)
 ```
 
-```{r graphic 2016, echo = FALSE}
+```{r graphic 2016, echo = FALSE, include = FALSE}
 data_frame_by_year %>%
   filter(year == 2016) %>%
   ggplot(aes(x = reorder(state, ev_density), y = ev_density, fill = party)) +
@@ -247,7 +232,7 @@ years_vector = c(2000, 2004, 2008, 2012, 2016)
 plots <- map(years_vector, make_graphic)
 ```
 
-```{r recent years graphics, echo = FALSE, warning = FALSE, message = FALSE}
+```{r recent years graphics, echo = FALSE, warning = FALSE, message = FALSE, include = FALSE}
 plots
 ```
 
@@ -266,7 +251,7 @@ year_df_dem <- data.frame(Rep = rep(0, 85), year = 1932:2016)
 year_df$predicted_value_dem <- as.numeric(predict.lm(rep_model, year_df_dem))
 ```
 
-```{r regression plot}
+```{r regression plot, include = FALSE}
 ggplot(year_df) +
   geom_point(aes(x = year, y = predicted_value),  color = "red") +
   geom_point(aes(x = year, y = predicted_value_dem), color = "blue")
@@ -299,7 +284,7 @@ complete_with_totals %>%
 
 ```{r stacked bar chart by proportion}
 complete_with_totals %>%
-  filter(year >= 1900) %>%
+  filter(year >= 1932) %>%
   ggplot(aes(x = year, y = ev_prop, fill = party)) +
     geom_col() +
     geom_hline(yintercept = .5) +
@@ -315,7 +300,7 @@ complete_with_totals %>%
 # directly proportional to population, and winner take-all system
 
 complete_with_totals %>%
-  filter(year >= 1964) %>%
+  filter(year >= 1932) %>%
   ggplot(aes(x = year, y = pop_prop, fill = party)) +
     geom_col() +
     geom_hline(yintercept = 0.5) +
