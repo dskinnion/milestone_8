@@ -14,6 +14,7 @@ library(scales)
 library(ggthemes)
 library(robustfa)
 library(broom)
+library(reshape)
 library(tidyverse)
 ```
 # About
@@ -60,7 +61,7 @@ state_populations <- census %>%
 electoral_votes <- elections_with_total_ev %>%
   select(year, president, state, party, state_electoral_votes)
 
-# Need to fix numbers: contested elections. I am looking at the number of electoral votes allotted, so these numbers should still be counted. Corrected numbers from https://en.wikipedia.org/wiki/United_States_Electoral_College
+# Needed to fix numbers: contested elections. I am looking at the number of electoral votes allotted, so these numbers should still be counted. Corrected numbers from https://en.wikipedia.org/wiki/United_States_Electoral_College
 electoral_votes[488, 5] = 6
 electoral_votes[493, 5] = 11
 electoral_votes[498, 5] = 12
@@ -83,6 +84,59 @@ electoral_votes[2201, 5] = 4
 electoral_votes[2217, 5] = 5
 electoral_votes[2233, 5] = 38
 electoral_votes[2237, 5] = 12
+```
+
+```{r modern popular vote dataframe, echo = FALSE}
+modern_popular_df <- elections_with_total_ev %>%
+  filter(year >= 1932) %>%
+  mutate(dem_votes = party_1,
+         dem_prop = dem_votes / total,
+         dem_ev = electoral_votes_1,
+         rep_votes = party_2,
+         rep_prop = rep_votes / total,
+         rep_ev = electoral_votes_2,
+         other_votes = party_3 + party_4,
+         other_prop = other_votes / total,
+         other_ev = electoral_votes_3 + electoral_votes_4,
+         winner = party) %>%
+  select(year, president, state, total, dem_votes, dem_prop, dem_ev, rep_votes,
+         rep_prop, rep_ev, other_votes, other_prop, other_ev, winner, state_electoral_votes)
+```
+
+```{r modern pop vote with totals, echo = FALSE}
+modern_popular_totals <- modern_popular_df %>%
+  group_by(year) %>%
+  summarize(total_dem_votes = sum(dem_votes),
+            total_rep_votes = sum(rep_votes),
+            total_other_votes = sum(other_votes)) %>%
+  mutate(total = total_dem_votes + total_rep_votes + total_other_votes,
+         Democrat = total_dem_votes / total,
+         Republican = total_rep_votes / total,
+         Other = total_other_votes / total)
+```
+
+```{r modern pop vote graphic, echo = FALSE, warning = FALSE}
+rep_totals <- modern_popular_totals %>%
+  melt.data.frame(id.vars = "year", measure.vars = "Republican", variable_name = "Party")
+
+dem_totals <- modern_popular_totals %>%
+  melt.data.frame(id.vars = "year", measure.vars = "Democrat", variable_name = "Party")
+
+other_totals <- modern_popular_totals %>%
+  melt.data.frame(id.vars = "year", measure.vars = "Other", variable_name = "Party")
+
+modern_pop_totals_by_party <- bind_rows(rep_totals, other_totals, dem_totals) %>%
+  mutate(proportion = value) %>%
+  select(year, Party, proportion)
+
+modern_pop_totals_by_party %>%
+ggplot(aes(x = year, y = proportion, fill = Party)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  geom_hline(yintercept = 0.5) +
+  scale_fill_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
+  labs(title = "What If The Election Were Popular?", x = "Year", y = "Votes") +
+    theme_fivethirtyeight()
 ```
 
 # 10 States with the Most Electoral Votes in 2016
@@ -267,7 +321,7 @@ complete_with_totals %>%
     geom_hline(yintercept = 0.5) +
     coord_flip() +
     scale_fill_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
-    labs(title = "Electoral Votes in Recent Years", x = "Year", y = "Electoral Votes") +
+    labs(title = "What If Electoral Votes were Directly Proportional?", x = "Year", y = "Electoral Votes") +
     theme_fivethirtyeight()
 ```
 
