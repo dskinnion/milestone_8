@@ -129,7 +129,7 @@ modern_pop_totals_by_party <- bind_rows(rep_totals, other_totals, dem_totals) %>
   mutate(proportion = value) %>%
   select(year, Party, proportion)
 
-modern_pop_totals_by_party %>%
+popular_graphic <- modern_pop_totals_by_party %>%
 ggplot(aes(x = year, y = proportion, fill = Party)) +
   geom_bar(stat = "identity") +
   coord_flip() +
@@ -137,6 +137,11 @@ ggplot(aes(x = year, y = proportion, fill = Party)) +
   scale_fill_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
   labs(title = "What If The Election Were Popular?", x = "Year", y = "Votes") +
     theme_fivethirtyeight()
+
+write_rds(modern_pop_totals_by_party, path = "graphics/modern_pop_totals_by_party.rds")
+write_rds(popular_graphic, path = "graphics/popular_graphic.rds")
+
+ggsave("graphics/popular_vote2.png", popular_graphic)
 ```
 
 ```{r function}
@@ -283,15 +288,17 @@ complete_with_totals %>%
 ```
 
 ```{r stacked bar chart by proportion}
-complete_with_totals %>%
+electoral_votes_graphic <- complete_with_totals %>%
   filter(year >= 1932) %>%
   ggplot(aes(x = year, y = ev_prop, fill = party)) +
     geom_col() +
     geom_hline(yintercept = .5) +
     coord_flip() +
     scale_fill_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
-    labs(title = "Electoral Votes in Recent Years", x = "Year", y = "Electoral Votes") +
+    labs(title = "Electoral Votes", x = "Year", y = "Electoral Votes") +
     theme_fivethirtyeight()
+
+write_rds(electoral_votes_graphic, path = "graphics/electoral_votes_graphic.rds")
 ```
 
 ```{r stacked bar chart by pop prop}
@@ -299,7 +306,7 @@ complete_with_totals %>%
 # Shows what would have happened if a state has electoral votes allocated
 # directly proportional to population, and winner take-all system
 
-complete_with_totals %>%
+directly_proportional_graphic <- complete_with_totals %>%
   filter(year >= 1932) %>%
   ggplot(aes(x = year, y = pop_prop, fill = party)) +
     geom_col() +
@@ -308,6 +315,8 @@ complete_with_totals %>%
     scale_fill_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
     labs(title = "What If Electoral Votes were Directly Proportional?", x = "Year", y = "Electoral Votes") +
     theme_fivethirtyeight()
+
+write_rds(directly_proportional_graphic, path = "graphics/directly_proportional_graphic.rds")
 ```
 
 ```{r animated graphic, echo = FALSE, eval = FALSE}
