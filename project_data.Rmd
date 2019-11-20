@@ -15,6 +15,7 @@ library(ggthemes)
 library(robustfa)
 library(broom)
 library(reshape)
+library(infer)
 library(tidyverse)
 ```
 # About
@@ -412,18 +413,90 @@ modern_popular_winner %>%
 modern_popular_winner %>%
   ggplot(aes(x = year, y = popular_winner_ec_boost, group = popular_winner, color = popular_winner)) +
     geom_point() +
-    geom_line()
+    geom_line() +
+    scale_color_manual(values = c("#2222CC", "#CC2222"))
 ```
 ```{r electoral loser boost, echo = FALSE}
 modern_popular_winner %>%
   ggplot(aes(x = year, y = electoral_loser_ec_boost, group = electoral_loser, color = electoral_loser)) +
     geom_point() +
-    geom_line()
+    geom_line() +
+    scale_color_manual(values = c("#2222CC", "#CC2222"))
 
 modern_popular_winner %>%
   ggplot(aes(x = year, y = popular_loser_ec_boost, group = popular_loser, color = popular_loser)) +
     geom_point() +
-    geom_line()
+    geom_line() +
+    scale_color_manual(values = c("#2222CC", "#CC2222"))
+```
+
+```{r bootsrap distribution, echo = FALSE}
+bootstrap_distribution <- modern_popular_winner %>%
+  rep_sample_n(size = 22, replace = TRUE, reps = 100000)
+
+# Republican loses popular vote
+rep_loser_mean <- bootstrap_distribution %>%
+  ungroup() %>%
+  filter(popular_winner == "Democratic") %>%
+  select(popular_loser_ec_boost) %>%
+  summarize(mean = mean(popular_loser_ec_boost)) %>%
+  pull(1)
+
+bootstrap_distribution %>%
+  filter(popular_winner == "Democratic") %>%
+  group_by(replicate) %>%
+  summarize(mean_popular_loser_ec_boost = mean(popular_loser_ec_boost)) %>%
+  ggplot(aes(x = mean_popular_loser_ec_boost)) +
+    geom_histogram(binwidth = 0.008, fill = "#CC2222") +
+    geom_vline(xintercept = rep_loser_mean)
+    
+# Democrat loses popular vote
+dem_loser_mean <- bootstrap_distribution %>%
+  ungroup() %>%
+  filter(popular_winner == "Republican") %>%
+  select(popular_loser_ec_boost) %>%
+  summarize(mean = mean(popular_loser_ec_boost)) %>%
+  pull(1)
+
+bootstrap_distribution %>%
+  filter(popular_winner == "Republican") %>%
+  group_by(replicate) %>%
+  summarize(mean_popular_loser_ec_boost = mean(popular_loser_ec_boost)) %>%
+  ggplot(aes(x = mean_popular_loser_ec_boost)) +
+    geom_histogram(binwidth = 0.008, fill = "#2222CC") +
+    geom_vline(xintercept = dem_loser_mean)
+
+# Republican wins popular vote
+rep_winner_mean <- bootstrap_distribution %>%
+  ungroup() %>%
+  filter(popular_winner == "Republican") %>%
+  select(popular_winner_ec_boost) %>%
+  summarize(mean = mean(popular_winner_ec_boost)) %>%
+  pull(1)
+
+bootstrap_distribution %>%
+  filter(popular_winner == "Republican") %>%
+  group_by(replicate) %>%
+  summarize(mean_popular_winner_ec_boost = mean(popular_winner_ec_boost)) %>%
+  ggplot(aes(x = mean_popular_winner_ec_boost)) +
+    geom_histogram(binwidth = 0.008, fill = "#CC2222") +
+    geom_vline(xintercept = rep_winner_mean)
+
+# Democrat loses popular vote
+dem_winner_mean <- bootstrap_distribution %>%
+  ungroup() %>%
+  filter(popular_winner == "Democratic") %>%
+  select(popular_winner_ec_boost) %>%
+  summarize(mean = mean(popular_winner_ec_boost)) %>%
+  pull(1)
+
+bootstrap_distribution %>%
+  filter(popular_winner == "Democratic") %>%
+  group_by(replicate) %>%
+  summarize(mean_popular_winner_ec_boost = mean(popular_winner_ec_boost)) %>%
+  ggplot(aes(x = mean_popular_winner_ec_boost)) +
+    geom_histogram(binwidth = 0.008, fill = "#2222CC") +
+    geom_vline(xintercept = dem_winner_mean)
 ```
 
 ```{r animated graphic, echo = FALSE, eval = FALSE}
