@@ -28,7 +28,13 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           dataset was found from a GitHub repository with historical
                           data.")),
 
-                 tabPanel("Graphics",
+                 tabPanel("Electoral Processes",
+                          p("This graphic shows modern elections assuming a winner
+                            take all system. This is how most states run their 
+                            elections. However, Nebraska and Maine split their
+                            electoral votes proportionately. Because of this, there
+                            may be slight variation between this graphic and the
+                            actual results of modern elections."),
                           imageOutput("electoral_vote"),
                           br(),
                           br(),
@@ -57,6 +63,12 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
+                          p("This graphic shows how elections would look if each
+                            state were allotted a truly proportional amount
+                            of electoral votes. Essentially, this graphic shows
+                            the possible outcomes that would occur if smaller
+                            states were not given more weight in the electoral
+                            college."),
                           imageOutput("directly_proportional"),
                           br(),
                           br(),
@@ -85,6 +97,9 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
+                          p("This graphic shows what the elections would look
+                            like if we elected our President with a national
+                            popular vote."),
                           imageOutput("popular_vote")))
 
 server <- function(input, output) {
