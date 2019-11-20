@@ -16,6 +16,7 @@ library(robustfa)
 library(broom)
 library(reshape)
 library(infer)
+library(plotly)
 library(tidyverse)
 ```
 # About
@@ -547,6 +548,29 @@ bootstrap_distribution %>%
     geom_vline(xintercept = dem_winner_mean) +
     xlim(0.0, 0.4) +
     ylim(0, 10000)
+```
+
+```{r interactive graphic, echo = FALSE}
+ev_density_plot <- function(input){
+  title = paste("Electoral Vote Density in", input)
+  
+  complete_data_frame %>%
+  filter(year == input) %>%
+  ggplot(aes(x = reorder(state, ev_density), y = ev_density, fill = party)) +
+    geom_col(width = 0.8, position = position_dodge(width = 5)) +
+    coord_flip() +
+    scale_fill_manual(values = c("#2222CC", "#CC2222")) +
+    labs(title = title, 
+         y = "Electoral Vote Density", 
+         x = "State", fill = "Winning Party")
+}
+
+years <- c(2012, 2016)
+
+evd_plots <- map(years, ev_density_plot)
+
+print(evd_plots[1])
+print(evd_plots[2])
 ```
 
 ```{r animated graphic, echo = FALSE, eval = FALSE}
