@@ -105,12 +105,12 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                             popular vote."),
                           imageOutput("popular_vote")),
                  tabPanel("Electoral Vote Densities",
+                          plotOutput("plot_1932"),
                           sliderInput("input", "Year:",
                                       min = 1932, 
                                       max = 2016, 
                                       value = 2000, 
-                                      step = 4),
-                          plotOutput("plot_1932")
+                                      step = 4)
                           )
                  )
 
