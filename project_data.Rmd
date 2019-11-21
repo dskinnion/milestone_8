@@ -573,31 +573,6 @@ years <- c(1932, 1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 197
            1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016)
 
 evd_plots <- map(years, ev_density_plot)
-
-plot_1932 <- evd_plots[1]
-write_rds(plot_1932, path = "graphics/plot_1932.rds")
-
-plot_1932 <- evd_plots[2]
-plot_1932 <- evd_plots[3]
-plot_1932 <- evd_plots[4]
-plot_1932 <- evd_plots[5]
-evd_plots[6]
-evd_plots[7]
-evd_plots[8]
-evd_plots[9]
-evd_plots[10]
-evd_plots[11]
-evd_plots[12]
-evd_plots[13]
-evd_plots[14]
-evd_plots[15]
-evd_plots[16]
-evd_plots[17]
-evd_plots[18]
-evd_plots[19]
-evd_plots[20]
-evd_plots[21]
-evd_plots[22]
 ```
 
 ```{r animated graphic, echo = FALSE, eval = FALSE}
