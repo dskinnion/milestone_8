@@ -1,5 +1,9 @@
 library(shiny)
 library(plotly)
+library(tidyverse)
+
+complete_data_frame2 <- read_rds(path = "complete_data_frame.rds")
+plot_1932_2 <- read_rds(path = "plot_1932.rds")
 
 ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                  tabPanel("About",
@@ -27,7 +31,6 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           United States Census, conducted every 10 years. This 
                           dataset was found from a GitHub repository with historical
                           data.")),
-
                  tabPanel("Electoral Processes",
                           p("This graphic shows modern elections assuming a winner
                             take all system. This is how most states run their 
@@ -100,9 +103,18 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           p("This graphic shows what the elections would look
                             like if we elected our President with a national
                             popular vote."),
-                          imageOutput("popular_vote")))
+                          imageOutput("popular_vote")),
+                 tabPanel("Electoral Vote Densities",
+                          sliderInput("input", "Year:",
+                                      min = 1932, 
+                                      max = 2016, 
+                                      value = 2000, 
+                                      step = 4),
+                          plotOutput("plot_1932")
+                          )
+                 )
 
-server <- function(input, output) {
+server <- function(input, output, session) {
     output$popular_vote <- renderImage({
         list(src = "popular_vote2.png",
              contentType = 'image/png',
@@ -125,6 +137,25 @@ server <- function(input, output) {
              height = "200%",
              width = "60%",
              style="display: block; margin-left: auto; margin-right: auto;"
-        )}, deleteFile = FALSE)}
+        )}, deleteFile = FALSE)
+    
+    output$plot_1932 <- renderPlot({
+        title <- paste("Electoral Vote Density in", input$input)
+        
+        plot <- complete_data_frame2 %>%
+            mutate(color = ifelse(party == "Democratic", "blue", ifelse(party == "Republican", "red", "yellow"))) %>%
+            filter(year == input$input) %>%
+            ggplot(aes(x = reorder(state, ev_density), y = ev_density, fill = color)) +
+            geom_col(width = 0.8) +
+            coord_flip() +
+            scale_fill_manual(values = c("#2222CC", "#CC2222", "#CCCC44"), labels = c("Democratic", "Republican", "Other")) +
+            labs(title = title, 
+                 y = "Electoral Vote Density", 
+                 x = "State", fill = "Winning Party")
+        
+        plot
+    })
+}
+
 
 shinyApp(ui, server)
