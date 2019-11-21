@@ -131,31 +131,7 @@ modern_popular_totals <- modern_popular_df %>%
          Other = total_other_votes / total)
 ```
 
-```{r modern pop vote graphic, echo = FALSE, warning = FALSE}
-rep_totals <- modern_popular_totals %>%
-  melt.data.frame(id.vars = "year", measure.vars = "Republican", variable_name = "Party")
 
-dem_totals <- modern_popular_totals %>%
-  melt.data.frame(id.vars = "year", measure.vars = "Democratic", variable_name = "Party")
-
-other_totals <- modern_popular_totals %>%
-  melt.data.frame(id.vars = "year", measure.vars = "Other", variable_name = "Party")
-
-modern_pop_totals_by_party <- bind_rows(rep_totals, other_totals, dem_totals) %>%
-  mutate(popular_proportion = value) %>%
-  select(year, Party, popular_proportion)
-
-popular_graphic <- modern_pop_totals_by_party %>%
-ggplot(aes(x = year, y = popular_proportion, fill = Party)) +
-  geom_bar(stat = "identity") +
-  coord_flip() +
-  geom_hline(yintercept = 0.5) +
-  scale_fill_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
-  labs(title = "What If The Election Were Popular?", x = "Year", y = "Votes") +
-    theme_fivethirtyeight()
-
-ggsave("graphics/popular_vote2.png", popular_graphic)
-```
 
 ```{r function}
 state_function <- function(input){
@@ -333,6 +309,33 @@ directly_proportional_graphic <- complete_with_totals %>%
 
 ggsave("graphics/directly_proportional2.png", directly_proportional_graphic)
 ```
+
+```{r modern pop vote graphic, echo = FALSE, warning = FALSE}
+rep_totals <- modern_popular_totals %>%
+  melt.data.frame(id.vars = "year", measure.vars = "Republican", variable_name = "Party")
+
+dem_totals <- modern_popular_totals %>%
+  melt.data.frame(id.vars = "year", measure.vars = "Democratic", variable_name = "Party")
+
+other_totals <- modern_popular_totals %>%
+  melt.data.frame(id.vars = "year", measure.vars = "Other", variable_name = "Party")
+
+modern_pop_totals_by_party <- bind_rows(rep_totals, other_totals, dem_totals) %>%
+  mutate(popular_proportion = value) %>%
+  select(year, Party, popular_proportion)
+
+popular_graphic <- modern_pop_totals_by_party %>%
+ggplot(aes(x = year, y = popular_proportion, fill = Party)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  geom_hline(yintercept = 0.5) +
+  scale_fill_manual(values = c("#2222CC", "#CCCC44", "#CC2222")) +
+  labs(title = "What If The Election Were Popular?", x = "Year", y = "Votes") +
+    theme_fivethirtyeight()
+
+ggsave("graphics/popular_vote2.png", popular_graphic)
+```
+
 ```{r modern_joined_df, echo = FALSE}
 modern_electoral_and_population_props <- complete_with_totals %>%
   filter(year >= 1932) %>%
