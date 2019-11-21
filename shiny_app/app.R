@@ -314,6 +314,9 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           imageOutput("dif_in_props")
+                          ),
+                 tabPanel("Methods",
+                          p("Hi.")
                           )
                  )
 
