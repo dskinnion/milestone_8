@@ -108,7 +108,7 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           fluidRow(
                               column(3),
                               column(6, align = "center",
-                                     plotOutput("plot_1932"),
+                                     plotOutput("plot_years"),
                                      sliderInput("input", "Year:",
                                                  min = 1932, 
                                                  max = 2016, 
@@ -144,7 +144,7 @@ server <- function(input, output, session) {
              style="display: block; margin-left: auto; margin-right: auto;"
         )}, deleteFile = FALSE)
     
-    output$plot_1932 <- renderPlot({
+    output$plot_years <- renderPlot({
         title <- paste("Electoral Vote Density in", input$input)
         
         plot <- complete_data_frame2 %>%
