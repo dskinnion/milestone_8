@@ -337,6 +337,9 @@ ggsave("graphics/popular_vote2.png", popular_graphic)
 ```
 
 ```{r modern_joined_df, echo = FALSE}
+
+# Filter for elections after the party realignment in 1932
+
 modern_electoral_and_population_props <- complete_with_totals %>%
   filter(year >= 1932) %>%
   group_by(year, party) %>%
@@ -356,6 +359,11 @@ modern_joined_df <- full_join(modern_electoral_and_population_props, modern_pop_
   mutate(electoral_proportion = ifelse(is.na(electoral_proportion) == TRUE, 0, electoral_proportion),
          population_proportion = ifelse(is.na(population_proportion) == TRUE, 0, population_proportion)) %>%
   mutate(ec_boost = electoral_proportion - popular_proportion)
+```
+
+```{r dataframe like above, but for all years}
+ 
+# TODO
 ```
 
 ```{r electoral college boost, echo = FALSE}
