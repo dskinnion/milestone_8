@@ -17,6 +17,7 @@ library(broom)
 library(reshape)
 library(infer)
 library(plotly)
+library(aod)
 library(tidyverse)
 ```
 # About
@@ -381,17 +382,6 @@ ggplot(modern_joined_df) +
 ```
 
 ```{r dataframe with winners, echo = FALSE}
-# modern_popular_winner <- modern_joined_df %>%
-#   group_by(year) %>%
-#   summarize()
-#   mutate(popular_winner = ifelse(popular_proportion > 0.5, "yes", "no"))
-# 
-# dems <- modern_popular_winner %>%
-#   filter(Party == "Democratic")
-# 
-# reps <- modern_popular_winner %>%
-#   filter(Party == "Republican")
-
 modern_popular_winner <- modern_joined_df %>%
   pivot_wider(id_cols = year, names_from = Party, values_from = c(electoral_proportion, population_proportion, popular_proportion, ec_boost)) %>%
   mutate(popular_winner = ifelse(popular_proportion_Democratic > popular_proportion_Republican, "Democratic", "Republican"),
@@ -402,7 +392,54 @@ modern_popular_winner <- modern_joined_df %>%
   mutate(electoral_winner_ec_boost = ifelse(electoral_winner == "Democratic", ec_boost_Democratic, ec_boost_Republican)) %>%
   mutate(electoral_loser_ec_boost = ifelse(electoral_winner == "Democratic", ec_boost_Republican, ec_boost_Democratic)) %>%
   mutate(popular_winner_ec_boost = ifelse(popular_winner == "Democratic", ec_boost_Democratic, ec_boost_Republican)) %>%
-  mutate(popular_loser_ec_boost = ifelse(popular_winner == "Democratic", ec_boost_Republican, ec_boost_Democratic))
+  mutate(popular_loser_ec_boost = ifelse(popular_winner == "Democratic", ec_boost_Republican, ec_boost_Democratic)) %>%
+  mutate(popular_winner_popular_prop = ifelse(popular_winner == "Democratic", popular_proportion_Democratic, popular_proportion_Republican)) %>%
+  mutate(popular_winner_electoral_prop = ifelse(popular_winner == "Democratic", electoral_proportion_Democratic, electoral_proportion_Republican)) %>%
+  mutate(electoral_winner_popular_prop = ifelse(electoral_winner == "Democratic", popular_proportion_Democratic, popular_proportion_Republican)) %>%
+  mutate(electoral_winner_electoral_prop = ifelse(electoral_winner == "Democratic", electoral_proportion_Democratic, electoral_proportion_Republican)) %>%
+  mutate(popular_loser_popular_prop = ifelse(popular_winner == "Democratic", popular_proportion_Republican, popular_proportion_Democratic)) %>%
+  mutate(popular_loser_electoral_prop = ifelse(popular_winner == "Democratic", electoral_proportion_Republican, electoral_proportion_Democratic)) %>%
+  mutate(electoral_loser_popular_prop = ifelse(electoral_winner == "Democratic", popular_proportion_Republican, popular_proportion_Democratic)) %>%
+  mutate(electoral_loser_electoral_prop = ifelse(electoral_winner == "Democratic", electoral_proportion_Republican, electoral_proportion_Democratic)) %>%
+  mutate(electoral_winner_popular_margin = electoral_winner_popular_prop - electoral_loser_popular_prop) %>%
+  mutate(electoral_winner_electoral_margin = electoral_winner_electoral_prop - electoral_loser_electoral_prop) %>%
+  mutate(popular_winner_popular_margin = popular_winner_popular_prop - popular_loser_popular_prop) %>%
+  mutate(popular_winner_electoral_margin = popular_winner_electoral_prop - popular_loser_electoral_prop) %>%
+  mutate(absolute_popular_margin = popular_winner_popular_prop - popular_loser_popular_prop) %>%
+  mutate(absolute_electoral_margin = electoral_winner_electoral_prop - electoral_loser_electoral_prop) %>%
+  mutate(ec_margin_change = ifelse(same_winner == "Yes", absolute_electoral_margin - absolute_popular_margin, absolute_electoral_margin + absolute_popular_margin))
+```
+
+```{r electoral margin vs popular margin scatterplot, echo = FALSE}
+
+# quasibinomial to get rid of weird warning that 
+# there were non-integer successes
+
+modern_popular_winner %>%
+  ggplot(aes(x = popular_margin, y = electoral_margin, color = electoral_winner)) +
+    geom_point() +
+    geom_smooth(method = "glm", method.args = list(family = "quasibinomial"), se = FALSE) +
+    geom_hline(yintercept = 0.5, col = "red")
+
+modern_popular_winner %>%
+  ggplot(aes(x = electoral_winner_popular_margin, y = electoral_winner_electoral_margin, color = electoral_winner)) +
+    geom_point() +
+    geom_smooth(method = "glm", method.args = list(family = "quasibinomial"), se = FALSE) +
+    geom_hline(yintercept = 0.5, col = "black") +
+    scale_color_manual(values = c("#2222CC", "#CC2222")) 
+
+modern_popular_winner %>%
+  ggplot(aes(x = electoral_winner_popular_prop, y = electoral_winner_electoral_prop, color = electoral_winner)) +
+    geom_point()
+
+modern_joined_df %>%
+  filter(Party != "Other") %>%
+  ggplot(aes(x = popular_proportion, y = electoral_proportion, color = Party)) +
+    geom_point() +
+    geom_smooth(method = "glm", method.args = list(family = "quasibinomial"), se = FALSE) +
+    geom_hline(yintercept = 0.5, col = "black") +
+    geom_vline(xintercept = 0.5, col = "gray") +
+    scale_color_manual(values = c("#2222CC", "#CC2222")) 
 ```
 
 ```{r electoral and popular winner boost over time, echo = FALSE}
@@ -551,7 +588,6 @@ bootstrap_distribution %>%
 ```
 
 ```{r interactive graphic, echo = FALSE}
-
 saveRDS(object = complete_data_frame, file = "shiny_app/complete_data_frame.rds")
 
 ev_density_plot <- function(input){
@@ -573,6 +609,34 @@ years <- c(1932, 1936, 1940, 1944, 1948, 1952, 1956, 1960, 1964, 1968, 1972, 197
            1984, 1988, 1992, 1996, 2000, 2004, 2008, 2012, 2016)
 
 evd_plots <- map(years, ev_density_plot)
+```
+
+```{r boxplot model, echo = FALSE}
+modern_joined_df <- modern_joined_df %>%
+  mutate(popular_winner = ifelse(year %in% c(1932, 1936, 1940, 1944, 1948,
+                                             1960, 1964, 1976, 1992, 1996,
+                                             2000, 2008, 2012, 2016),
+                                     "Democratic", "Republican"),
+         electoral_winner = ifelse(year %in% c(1932, 1936, 1940, 1944, 1948,
+                                             1960, 1964, 1976, 1992, 1996,
+                                             2008, 2012),
+                                       "Democratic", "Republican"),
+         win_the_pop = ifelse(Party == popular_winner, 1, 0),
+         win_the_ec = ifelse(Party == electoral_winner, 1, 0))
+
+modern_joined_df %>%
+  filter(win_the_pop == 1) %>%
+  ggplot(aes(x = Party, y = ec_boost)) +
+    geom_boxplot()
+
+modern_joined_df %>%
+  filter(win_the_pop == 0) %>%
+  ggplot(aes(x = Party, y = ec_boost)) +
+    geom_boxplot()
+
+modern_joined_df %>%
+  ggplot(aes(x = Party, y = ec_boost)) +
+    geom_boxplot()
 ```
 
 ```{r animated graphic, echo = FALSE, eval = FALSE}
