@@ -18,3 +18,7 @@ file_copy(path = "graphics/winner_boxplot2.png",
           new_path = "shiny_app/winner_boxplot2.png")
 file_copy(path = "graphics/loser_boxplot2.png",
           new_path = "shiny_app/loser_boxplot2.png")
+file_copy(path = "graphics/pop_vs_ec_props2.png",
+          new_path = "shiny_app/pop_vs_ec_props2.png")
+file_copy(path = "graphics/dif_in_props2.png",
+          new_path = "shiny_app/dif_in_props2.png")
