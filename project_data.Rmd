@@ -536,6 +536,8 @@ winner_boxplot_graphic <- modern_joined_df %>%
          subtitle = "The EC More Positively Republicans Who Lose the Popular Vote \n(and Can Even Hurt Democratic Winners)") +
          scale_color_manual(values = c("#2222CC", "#CC2222"))
 
+ggsave("graphics/winner_boxplot2.png", winner_boxplot_graphic)
+
 loser_boxplot_graphic <- modern_joined_df %>%
   filter(win_the_pop == 0) %>%
   ggplot(aes(x = Party, y = ec_boost, color = Party)) +
@@ -546,6 +548,8 @@ loser_boxplot_graphic <- modern_joined_df %>%
          subtitle = "The EC Less Negatively Hurts Republicans Who Lose the Popular Vote \n(and Can Even Help Them)") +
          scale_color_manual(values = c("#2222CC", "#CCCC44", "#CC2222"))
 
+ggsave("graphics/loser_boxplot2.png", loser_boxplot_graphic)
+
 overall_boxplot_graphic <- modern_joined_df %>%
   ggplot(aes(x = Party, y = ec_boost, color = Party)) +
     geom_boxplot() +
@@ -554,6 +558,8 @@ overall_boxplot_graphic <- modern_joined_df %>%
          title = "How Does the Electoral College Affect Election Outcomes?",
          subtitle = "Democrats Appear to be Helped More by the EC") +
          scale_color_manual(values = c("#2222CC", "#CCCC44", "#CC2222"))
+
+ggsave("graphics/overall_boxplot2.png", overall_boxplot_graphic)
 ```
 
 ```{r animated graphic, echo = FALSE, eval = FALSE}
