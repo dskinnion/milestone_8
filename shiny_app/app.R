@@ -3,7 +3,6 @@ library(plotly)
 library(tidyverse)
 
 complete_data_frame2 <- read_rds(path = "complete_data_frame.rds")
-plot_1932_2 <- read_rds(path = "plot_1932.rds")
 
 ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                  tabPanel("About",
