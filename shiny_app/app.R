@@ -512,7 +512,36 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                              candidate.")
                           ),
                  tabPanel("Methods",
-                          p("Hi.")
+                          h3("I decided to study the electoral college and its effect on the 
+                            Presidential Election. Because of this, I needed both election data
+                            and population data. Merging these two sources, I was able to calculate
+                            new variables, such as electoral vote density, and make comparisons between
+                            the electoral vote and the popular vote."),
+                          br(),
+                          h3("I chose to use logistic regressions because the trends were definitely
+                             not linear, and it made sense to have the regressions approach 0 and 1
+                             since I was looking at proportions."),
+                          br(),
+                          h3("I also chose to filter for only modern elections for most of the
+                             graphics and regressions in this project. This is not to say that
+                             there are not valid models and regressions to be made from the
+                             earlier years of the United States, but I was mainly interested
+                             in the effect of the Electoral College on the modern Democratic
+                             and Republican Parties."),
+                          br(),
+                          h3("I also tried to use bootstrap distributions to model the distributions
+                             of the effect of the electoral college when grouped by winner/loser of
+                             the popular vote and party. However, when I did this, I would have to summarize
+                             across each group, and the would essentially erase the extreme values, which
+                             are the interesting data points -- i.e. where the winner of the electoral vote
+                             may not have been the winner of the popular vote. Instead, I decided
+                             to show the distributions with boxplots. This allows us to see the extreme values
+                             and the central tendencies, as well as the spread for each group."),
+                          br(),
+                          h3("I also wanted to see if there were any general trend over time,
+                             but as evidenced by the scatterplots with the proportions of the popular
+                             vote and electoral college vote over time, there does no appear to be
+                             any.")
                           )
                  )
 
