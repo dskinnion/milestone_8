@@ -2,6 +2,10 @@ library(shiny)
 library(plotly)
 library(tidyverse)
 
+# Load in rds of the dataframe that I used to make the interactive plot
+# Most, if not all, of my plots were overlapping, so I needed 20 page breaks
+# in between each plot
+
 complete_data_frame2 <- read_rds(path = "complete_data_frame.rds")
 
 ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
@@ -546,6 +550,14 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                  )
 
 server <- function(input, output, session) {
+    
+    # I had tried to use write_rds() to make my plots, but I was having issues
+    # loading them in. Instead, I used ggsave() and then copied my files into 
+    # my shiny app directory, and then using that new file as my source.
+    # This was the same for every plot except for the interactive plot.
+    # I also could not figure out how to make the height and width not 
+    # dynamic, so I tried my best to scale them to good proportions.
+    
     output$popular_vote <- renderImage({
         list(src = "popular_vote2.png",
              contentType = 'image/png',
@@ -571,6 +583,16 @@ server <- function(input, output, session) {
         )}, deleteFile = FALSE)
     
     output$plot_years <- renderPlot({
+        
+        # I named the slider input "input" that way whereever I want the input
+        # I can just put input$input. 
+        # I needed this in the title, which I used paste() to make.
+        # I then made a dummy variable called color that way I could make the color
+        # match the order that I wanted.
+        # I then needed to reorder the states by their electoral vote density
+        # that way the most disproportionate states were on the top.
+        # The axis labels were overlapping, so I had to flip the coordinates.
+        
         title <- paste("Electoral Vote Density in", input$input)
         
         plot <- complete_data_frame2 %>%
