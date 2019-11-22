@@ -38,7 +38,9 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                              there was a party realignment during the Presidency of
                              Franklin D. Roosevelt. As such, the comparisons made
                              between the Democratic and Republican Parties only
-                             include the years from 1932 to 2016.")
+                             include the years from 1932 to 2016."),
+                          h3("Final Project. Harvard College Gov. 1005."),
+                          h3("Author: Dominic Skinnion")
                   ),
                  tabPanel("Electoral Processes",
                           h1("Current Electoral College:"),
