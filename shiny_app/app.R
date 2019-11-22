@@ -6,7 +6,7 @@ complete_data_frame2 <- read_rds(path = "complete_data_frame.rds")
 
 ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                  tabPanel("About",
-                          p("In the United States, the people do not directly 
+                          h3("In the United States, the people do not directly 
                           vote for President. The Founding Fathers believed that
                           a true democracy was subject to the rule of factions
                           and mob rule. The electoral college, they believed,
@@ -20,7 +20,7 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           in 1961, Washington D.C. was also given electoral votes, 
                           but not to exceed the lowest number of votes that a 
                           state has -- this has usually limited D.C. to 3 votes."),
-                          p("The data for the United States general elections was 
+                          h3("The data for the United States general elections was 
                           found from a Github repository which included multiple 
                           government datasets. Elections that were contested were 
                           labelled with asterisks in this dataset, so I ammended 
@@ -29,14 +29,25 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           The population data for the states are based off of the 
                           United States Census, conducted every 10 years. This 
                           dataset was found from a GitHub repository with historical
-                          data.")),
+                          data."),
+                          h3("Per political historians, it is widely believed that
+                             there was a party realignment during the Presidency of
+                             Franklin D. Roosevelt. As such, the comparisons made
+                             between the Democratic and Republican Parties only
+                             include the years from 1932 to 2016.")
+                  ),
                  tabPanel("Electoral Processes",
-                          p("This graphic shows modern elections assuming a winner
+                          h1("Current Electoral College:"),
+                          h2("Winner-Take-All System"),
+                          h3("This graphic shows modern elections assuming a winner
                             take all system. This is how most states run their 
                             elections. However, Nebraska and Maine split their
-                            electoral votes proportionately. Because of this, there
+                            electoral votes proportionately. Also, there were
+                            a few elections where there were disputed votes, which
+                            were subsequently thrown out. Because of this, there
                             may be slight variation between this graphic and the
                             actual results of modern elections."),
+                          br(),
                           imageOutput("electoral_vote"),
                           br(),
                           br(),
@@ -65,12 +76,15 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
-                          p("This graphic shows how elections would look if each
+                          h1("Directly Proportional Number of Electoral Votes:"),
+                          h2("Winner-Take-All System"),
+                          h3("This graphic shows how elections would look if each
                             state were allotted a truly proportional amount
                             of electoral votes. Essentially, this graphic shows
                             the possible outcomes that would occur if smaller
                             states were not given more weight in the electoral
                             college."),
+                          br(),
                           imageOutput("directly_proportional"),
                           br(),
                           br(),
@@ -99,11 +113,68 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
-                          p("This graphic shows what the elections would look
+                          h1("Popular Vote:"),
+                          h3("This graphic shows what the elections would look
                             like if we elected our President with a national
                             popular vote."),
-                          imageOutput("popular_vote")),
+                          br(),
+                          imageOutput("popular_vote"),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          h3("As evidenced by the very minimal difference between
+                             the Current Electoral College and a Directly Proportional
+                             System, the argument that Electoral College protects 
+                             smaller states by giving them more of a say in the voting
+                             process is flawed. Equally flawed is the argument that the 
+                             Electoral College is unfair because it gives the smaller states
+                             a larger say. In fact, the Electoral College does not seem
+                             to protect smaller states, nor does it give them a larger say
+                             in our national election"),
+                          br(),
+                          h3("As evidenced by the drastic change between the Current Electoral
+                             College and a Popular Vote, the argument that the Electoral 
+                             College does not accurately reflect the views of the American
+                             people is valid. However, this is what the Founding Fathers intended.
+                             They believed mob rule to be a very real and valid threat, especially
+                             following Shays' Rebellion in Massachusetts during the young country's
+                             years under the Articles of Confederation. As such, the Electoral
+                             College was put in place to control for mob rule, by placing electors
+                             in charge of choosing a President. However, now that the states'
+                             electors vote as their state's people vote, one could ask whether
+                             or not such a system is still valid.")
+                  ),
                  tabPanel("Electoral Vote Densities",
+                          h1("Electoral Vote Densities:"),
+                          h2("Move the slider to pick a year."),
+                          h3("Electoral Vote Density, for the purposes of this
+                             project, is calculated as the number of electoral
+                             votes divided by the number of people represented
+                             by those electoral votes"),
                           fluidRow(
                               column(3),
                               column(6, align = "center",
@@ -114,9 +185,19 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                                                  value = 2000, 
                                                  step = 4)),
                               column(3)
-                              )
+                              ),
+                          h3("Note that the latest census data was from 2010, and
+                             as such, the total population estimates for states in 
+                             2016 is the same as in 2012."),
+                          h3("This graphic essentially shows the disproportionate
+                             amount of voting power each state has in the current
+                             Electoral College. However, as shown in the Electoral
+                             Processes tab, this suprisingly has little effect
+                             on the outcome of elections.")
                           ),
                  tabPanel("Effect of the EC",
+                          h1("Popular Vote Proportions:"),
+                          br(),
                           imageOutput("popular_proportions"),
                           br(),
                           br(),
@@ -144,6 +225,8 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
+                          br(),
+                          h1("Electoral College Proportions:"),
                           br(),
                           imageOutput("ec_proportions"),
                           br(),
@@ -173,6 +256,14 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
+                          h3("The Electoral College Proportions are much more drastic than
+                             the Popular Vote Proportions, indicating that the Electoral 
+                             College skews the margins of victory, so we next look at the
+                             trend of the Effect of the Electoral College over time."),
+                          br(),
+                          br(),
+                          h1("Effect of the Electoral College on Win Percentages:"),
+                          br(),
                           imageOutput("effect_of_ec"),
                           br(),
                           br(),
@@ -200,6 +291,15 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
+                          br(),
+                          h3("This shows that the Electoral College skews the results both
+                             positively and negatively. To see who is \"helped\" and who is \"hurt\"
+                             by the Electoral College, we will need to group by the outcome of the 
+                             popular vote."),
+                          br(),
+                          br(),
+                          h1("Distributions of the Effect of the Electoral College on Win 
+                             Percentages by Party:"),
                           br(),
                           imageOutput("overall_boxplot"),
                           br(),
@@ -229,6 +329,15 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
+                          h3("This makes it look like Democrats are generally helped by the
+                             Electoral College. However, as suggested by the previous graphic,
+                             we should group by the outcome of the popular vote to see what is
+                             happening."),
+                          br(),
+                          br(),
+                          h1("Distributions of the Effect of the Electoral College on the
+                             Win Percentages of the Winner of the Popular Vote by Party"),
+                          br(),
                           imageOutput("winner_boxplot"),
                           br(),
                           br(),
@@ -256,6 +365,14 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
+                          br(),
+                          h3("This shows that when we group for the winner of the popular
+                             vote, we can see that Republicans are actually given a larger
+                             increase in their win percentage than Democrats are."),
+                          br(),
+                          br(),
+                          h1("Distributions of the Effect of the Electoral College on the
+                             Win Percentages of the Loser of the Popular Vote by Party"),
                           br(),
                           imageOutput("loser_boxplot"),
                           br(),
@@ -285,6 +402,18 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
+                          h3("This shows that when we group for the loser of the popular
+                             vote, we can see that Democrats are actually given a larger
+                             decrease in their win percentage than Republicans are."),
+                          br(),
+                          br(),
+                          h3("How can this be? This is a real-life example of Simpson's
+                             Paradox. Essentially, when grouped together, the overall trend
+                             of the data is opposite the trends of grouped sets of the data."),
+                          br(),
+                          br(),
+                          h1("Popular Vote Proportion vs. Electoral Vote Proportion:"),
+                          br(),
                           imageOutput("pop_vs_ec_props"),
                           br(),
                           br(),
@@ -313,7 +442,74 @@ ui <- navbarPage("Does the Electoral College Give Republicans an Edge?",
                           br(),
                           br(),
                           br(),
-                          imageOutput("dif_in_props")
+                          h3("This shows the logistic regressions of the effect of the popular
+                             vote proportion on the electoral college proportion. As shown by 
+                             the vertical and horizontal lines at 0.5, we can split the grid
+                             into 4 separate quadrants. In the upper right quadrant, we have the
+                             candidates who won a majority of the popular vote and the electoral 
+                             vote. In the upper left quadrant, we have the candidates who failed
+                             to win a majority of the popular vote, but won the electoral vote.
+                             In the lower left quadrant, we have the candidates who lost both the 
+                             popular vote and the electoral vote. In the lower right quadrant, we
+                             would have the candidates who won a majority of the popular vote,
+                             but lost the electoral vote. However, there are none. But how can there
+                             be candidates who won the electoral college without winning the popular
+                             vote if there are no candidates who won a majority of the popular vote
+                             and lost the electoral vote? The answer is third parties. In controversial
+                             elections like 2000 and 2016, third parties had just enough votes to 
+                             make sure that neither of the two main candidates gained a majority of 
+                             the popular vote, as shown in the Electoral College Processes tab."),
+                          br(),
+                          h3("These two logistic regressions are extremely similar, indicating
+                             that the relationship between the popular vote proportion and the
+                             electoral vote proportion is not largely affected by the party
+                             of the candidate. However, it is still important to notice that for
+                             the majority of the plot, the Republican regression lies slightly to
+                             the left of the Democratic regression, indicating that on a very small
+                             magnitude, the models predict that a Republican candidate needs a smaller 
+                             popular vote proportion in order to receive the same electoral vote proportion 
+                             as a Democratic candidate."),
+                          br(),
+                          br(),
+                          h1("Difference in the Electoral College Proportion and the Popular
+                             Vote Proportion vs. Popular Vote Margin"),
+                          imageOutput("dif_in_props"),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          br(),
+                          h3("This regression shows that as the popular vote margin decreases,
+                             there is a greater chance that the popular vote winner is 
+                             negatively affected by the electoral college, regardless of the 
+                             candidate's party. However, again, it is important to notice
+                             that the Republican regression line lies slightly to the left
+                             of the Democratic regression line, indicating that a Republican 
+                             candidate would need a smaller margin of victory in the popular
+                             vote in order to be as negatively affected as a Democratic
+                             candidate.")
                           ),
                  tabPanel("Methods",
                           p("Hi.")
